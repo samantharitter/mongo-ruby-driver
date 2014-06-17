@@ -48,11 +48,22 @@ module Mongo
           @spec = spec
         end
 
+        # Execute the operation.
+        #
+        # @param [ Mongo::Server::Context ] The context for this operation.
+        #
+        # @return [ QueryResponse ] the operation response.
+        #
+        # @since 2.0.0
+        def execute(context)
+          QueryResponse.new(super)
+        end
+
         private
 
         # The selector for the query.
         #
-        # @return [ Hash ] The query selector. 
+        # @return [ Hash ] The query selector.
         #
         # @since 3.0.0
         def selector
@@ -75,6 +86,14 @@ module Mongo
         # @since 3.0.0
         def message
           Mongo::Protocol::Query.new(db_name, coll_name, selector, opts)
+        end
+
+        # Objects representing a db response to a query operation.
+        #
+        # @since 2.0.0
+        class QueryResponse
+          include Responsive
+          include ReadableResponse
         end
       end
     end
