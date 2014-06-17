@@ -20,12 +20,12 @@ module Mongo
     # @since 3.0.0
     module Responsive
 
-      # @return [ Hash ] this response's message.
+      # @return [ Protocol::Reply ] this response's message.
       attr_reader :msg
 
       # Initialize a new Response object.
       #
-      # @param [ Hash ] response document.
+      # @param [ Protocol::Reply ] db response message.
       #
       # @since 3.0.0
       def initialize(msg)
@@ -38,16 +38,18 @@ module Mongo
       #
       # @since 3.0.0
       def success?
+        msg.flags
+
         msg['ok'] == 1 || msg['ok'] == 1.0 || msg['ok'] == true
       end
 
-      # Parse the 'n' field out from a db response to a write command.
+      # Parse the 'n' field out from a db response to an operation.
       #
       # @return [ Integer ] number of documents matching query.
       #
       # @since 3.0.0
       def n
-        msg['n']
+        msg.number_returned
       end
 
       # Return a hash representing this response object.
@@ -56,7 +58,7 @@ module Mongo
       #
       # @since 3.0.0
       def hash
-        msg
+        msg.hash
       end
     end
   end

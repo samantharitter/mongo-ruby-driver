@@ -23,6 +23,10 @@ require 'mongo/operation/map_reduce'
 require 'mongo/operation/command'
 require 'mongo/operation/kill_cursors'
 
+# response-related things
+require 'mongo/operation/error'
+require 'mongo/operation/responsive'
+
 module Mongo
 
   module Operation
