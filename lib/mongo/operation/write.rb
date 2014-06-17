@@ -15,6 +15,7 @@
 require 'mongo/operation/write/delete'
 require 'mongo/operation/write/insert'
 require 'mongo/operation/write/update'
+require 'mongo/operation/write/writable_response'
 
 require 'mongo/operation/write/write_command'
 
@@ -33,4 +34,3 @@ module Mongo
     end
   end
 end
-
