@@ -78,7 +78,7 @@ module Mongo
             deletes.each do |d|
               context.with_connection do |connection|
                 gle = write_concern.get_last_error
-                connection.dispatch([message(d), gle].compact)
+                RemoveResponse.new(connection.dispatch([message(d), gle].compact))
               end
             end
           end
@@ -113,6 +113,14 @@ module Mongo
           selector    = delete_spec[:q]
           delete_opts = delete_spec[:limit] == 0 ? { } : { :flags => [:single_remove] }
           Mongo::Protocol::Delete.new(db_name, coll_name, selector, delete_opts)
+        end
+
+        # Represent db responses to delete operations.
+        #
+        # @since 2.0.0
+        class RemoveResponse
+          include Responsive
+          include WritableResponse
         end
       end
     end

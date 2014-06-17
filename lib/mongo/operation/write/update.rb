@@ -23,7 +23,7 @@ module Mongo
       # and sent instead.
       # See Mongo::Operation::Write::WriteCommand::Update
       #
-      # @since 3.0.0
+      # @since 2.0.0
       class Update
         include Executable
 
@@ -55,7 +55,7 @@ module Mongo
         # @option spec :opts [ Hash ] Options for the command, if it ends up being a
         #   write command.
         #
-        # @since 3.0.0
+        # @since 2.0.0
         def initialize(spec)
           @spec = spec
         end
@@ -69,7 +69,7 @@ module Mongo
         #
         # @return [ Mongo::Response ] The operation response, if there is one.
         #
-        # @since 3.0.0
+        # @since 2.0.0
         def execute(context)
           raise Exception, "Must use primary server" unless context.primary?
           # @todo: change wire version to constant
@@ -80,7 +80,7 @@ module Mongo
             updates.each do |d|
               context.with_connection do |connection|
                 gle = write_concern.get_last_error
-                connection.dispatch([message(d), gle].compact)
+                UpdateResponse.new(connection.dispatch([message(d), gle].compact))
               end
             end
           end
@@ -92,7 +92,7 @@ module Mongo
         #
         # @return [ Mongo::WriteConcern::Mode ] The write concern.
         #
-        # @since 3.0.0
+        # @since 2.0.0
         def write_concern
           @spec[:write_concern]
         end
@@ -101,7 +101,7 @@ module Mongo
         #
         # @return [ Array ] The update documents.
         #
-        # @since 3.0.0
+        # @since 2.0.0
         def updates
           @spec[:updates]
         end
@@ -110,12 +110,29 @@ module Mongo
         #
         # @return [ Mongo::Protocol::Update ] Wire protocol message.
         #
-        # @since 3.0.0
+        # @since 2.0.0
         def message(update_spec = {})
           selector    = update_spec[:q]
           update      = update_spec[:u]
           update_opts = update_spec[:multi] ? { :flags => [:multi_update] } : { }
           Mongo::Protocol::Update.new(db_name, coll_name, selector, update, update_opts)
+        end
+
+        # Represent db responses to update operations.
+        #
+        # @since 2.0.0
+        class UpdateResponse
+          include Responsive
+          include WritableResponse
+
+          # Return the _id of the document upserted by this operation.
+          #
+          # @return [ BSON::ObjectId, Integer ] theupserted document.
+          #
+          # @since 2.0.0
+          def upserted
+            msg.documents[0][:upserted]
+          end
         end
       end
     end

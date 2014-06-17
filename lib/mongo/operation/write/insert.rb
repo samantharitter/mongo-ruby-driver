@@ -56,7 +56,7 @@ module Mongo
 
         # Execute the operation.
         # If the server has version < 2.5.5, an insert operation is sent.
-        # If the server version is >= 2.5.5, an insert write command operation is created
+        # If server version is >= 2.5.5, an insert write command operation is created
         # and sent instead.
         #
         # @params [ Mongo::Server::Context ] The context for this operation.
@@ -74,7 +74,7 @@ module Mongo
             documents.each do |d|
               context.with_connection do |connection|
                 gle = write_concern.get_last_error
-                connection.dispatch([message(d), gle].compact)
+                InsertResponse.new(connection.dispatch([message(d), gle].compact))
               end
             end
           end
@@ -109,6 +109,14 @@ module Mongo
           document = [insert_spec[:document]]
           insert_spec = insert_spec[:continue_on_error] == 0 ? { } : { :flags => [:continue_on_error] }
           Mongo::Protocol::Insert.new(db_name, coll_name, document, insert_spec)
+        end
+
+        # Describe db responses to insert operations.
+        #
+        # @since 2.0.0
+        class InsertResponse
+          include Responsive
+          include WritableResponse
         end
       end
     end
