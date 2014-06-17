@@ -78,7 +78,7 @@ module Mongo
           context = Mongo::ServerPreference.get(:primary).server.context
         end
         context.with_connection do |connection|
-          connection.dispatch([message])
+          CommandResponse.new(connection.dispatch([message]))
         end
       end
 
@@ -87,7 +87,7 @@ module Mongo
       # The selector for the command.
       # Note that a command is actually a query on the virtual '$cmd' collection.
       #
-      # @return [ Hash ] The command selector. 
+      # @return [ Hash ] The command selector.
       #
       # @since 3.0.0
       def selector
@@ -115,15 +115,37 @@ module Mongo
 
       # The wire protocol message for this operation.
       #
-      # @return [ Mongo::Protocol::Query ] Wire protocol message. 
+      # @return [ Mongo::Protocol::Query ] Wire protocol message.
       #
       # @since 3.0.0
       def message
         Mongo::Protocol::Query.new(db_name, Mongo::Operation::COMMAND_COLLECTION_NAME,
                                    selector, opts)
       end
+
+      # A response object to represent db responses to commands.
+      #
+      # @since 2.0.0
+      class CommandResponse
+        include Responsive
+
+        # Return the information from this command.
+        #
+        # @return [ Hash ] command data.
+        #
+        # @since 2.0.0
+        def data
+          msg.documents[0]
+        end
+
+        # Catch-all for flexible command fields.
+        #
+        # @since 2.0.0
+        def method_missing(m)
+          raise NoMethodError, 'No field #{m} in command' unless data[m]
+          return data[m]
+        end
+      end
     end
   end
 end
-
-

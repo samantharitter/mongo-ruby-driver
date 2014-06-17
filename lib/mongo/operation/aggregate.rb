@@ -80,7 +80,7 @@ module Mongo
           context = Mongo::ServerPreference.get(:primary).server.context
         end
         context.with_connection do |connection|
-          connection.dispatch([message])
+          AggregateResponse.new(connection.dispatch([message]))
         end
       end
 
@@ -105,8 +105,8 @@ module Mongo
       end
 
       # Whether this operation can be executed on a replica set secondary server.
-      # The aggregate operation may not be executed on a secondary if the user has specified
-      # an output collection to which the results will be written.
+      # The aggregate operation may not be executed on a secondary if the user has
+      # specified an output collection to which the results will be written.
       #
       # @return [ true, false ] Whether the operation can be executed on a secondary.
       #
@@ -124,7 +124,15 @@ module Mongo
         Mongo::Protocol::Query.new(db_name, Mongo::Operation::COMMAND_COLLECTION_NAME,
                                    selector, opts)
       end
+
+      # A response object for responses to aggregation queries.
+      #
+      # @since 2.0.0
+      class AggregateResponse
+        include Responsive
+
+        # @todo - cursor functionality here?
+      end
     end
   end
 end
-
