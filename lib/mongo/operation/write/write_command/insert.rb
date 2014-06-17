@@ -37,6 +37,18 @@ module Mongo
           include Executable
           include Writable
 
+          # Execute the operation.
+          #
+          # @param [ Mongo::Server::Context ] The context for this operation.
+          #
+          # @return [ Mongo::Operation::Write::WriteCommand::RemoveResponse ] the
+          #   operation response.
+          #
+          # @since 2.0.0
+          def execute(context)
+            InsertResponse.new(super)
+          end
+
           private
 
           def secondary_ok?
@@ -55,9 +67,16 @@ module Mongo
               :ordered       => ordered?
             }
           end
+
+          # Represent a db response to an insert operation.
+          #
+          # @since 2.0.0
+          class InsertResponse
+            include Responsive
+            include WritableResponse
+          end
         end
       end
     end
   end
 end
-

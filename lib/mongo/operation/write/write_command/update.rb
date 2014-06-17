@@ -42,6 +42,18 @@ module Mongo
           include Executable
           include Writable
 
+          # Execute this operation.
+          #
+          # @param [ Mongo::Server::Context ] The context for this operation.
+          #
+          # @return [ Mongo::Operation::Write::WriteCommand::RemoveResponse ] the
+          #   operation response.
+          #
+          # @since 2.0.0
+          def execute(context)
+            UpdateResponse.new(super)
+          end
+
           private
 
           def secondary_ok?
@@ -60,9 +72,25 @@ module Mongo
               :ordered       => ordered?
             }
           end
+
+          # Represent db responses to update operations.
+          #
+          # @since 2.0.0
+          class UpdateResponse
+            include Responsive
+            include WritableResponse
+
+            # Return the _id of the document upserted by this operation.
+            #
+            # @return [ BSON::ObjectId, Integer ] theupserted document.
+            #
+            # @since 2.0.0
+            def upserted
+              msg.documents[0][:upserted]
+            end
+          end
         end
       end
     end
   end
 end
-
